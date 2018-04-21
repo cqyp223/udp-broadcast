@@ -29,6 +29,7 @@ def main(argv):
 		elif (argumenty[i][:12] == "--address_ip") or (argumenty[i][:3] == "-ip"):
 			temp = argumenty[i].split("=")
 			try:
+				print(temp)
 				ip = temp[1]
 			except IndexError:
 				print("Niepoprawny argument: --address_ip (-ip)")
