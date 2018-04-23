@@ -52,9 +52,10 @@ def main(argv):
 	process = subprocess.Popen(["ffmpeg", "-re", "-video_size", "1920x1080", "-framerate", "30", "-f", "x11grab", "-i", ":0.0", "-c:v", "mpeg2video", "-crf", "0", "-preset", "ultrafast", "-maxrate", "20M", "-b:v", "10M", "-f", "mpegts", "-"], stdout=pipe_w)
 	#print(process.comunicate()[0])
 	data = os.fdopen(pipe_r)
-	message = data.read()
 	while 1: # główna pętla programu
-		sock.sendto(message, (ip, port)) # wysyłanie datagramu UDP
+		message = data.read(1024)
+		if message:
+			sock.sendto(message, (ip, port)) # wysyłanie datagramu UDP
 
 
 if __name__ == "__main__":
