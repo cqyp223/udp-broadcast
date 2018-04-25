@@ -48,23 +48,20 @@ def main(argv):
 	
 	print("Streaming at IP {}, PORT {}".format(ip, port))
 	
-	pipe = ""
-	if not os.path.exists(pipe):
-		os.mkfifo(pipe)
-		
+	pipe_r, pipe_w = os.pipe()	
 	pid = os.fork()
 	if pid != 0:
 		# parent()
-		pipe_in = open(pipe, "rb")
+		os.close(pipe_w) # Zamykamy deskryptor pliku
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 		while 1:
-			data = pipe_in.read(1024)
+			data = pipe_r.read(1024)
 			if data:
 				sock.sendto(data, (ip, port)) # Wysyłanie datagramu UDP
 	else:
 		# child()
-		pipe_out = os.open(pipe, os.O_WRONLY)
-		process = subprocess.Popen(["ffmpeg", "-re", "-video_size", "1920x1080", "-framerate", "30", "-f", "x11grab", "-i", ":0.0", "-c:v", "mpeg2video", "-crf", "0", "-preset", "ultrafast", "-maxrate", "20M", "-b:v", "10M", "-f", "mpegts", pipe_out])
+		os.close(pipe_r)
+		process = subprocess.Popen(["ffmpeg", "-re", "-video_size", "1920x1080", "-framerate", "30", "-f", "x11grab", "-i", ":0.0", "-c:v", "mpeg2video", "-crf", "0", "-preset", "ultrafast", "-maxrate", "20M", "-b:v", "10M", "-f", "mpegts", pipe_w])
 
 
 if __name__ == "__main__":
