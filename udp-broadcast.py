@@ -32,6 +32,7 @@ def main(argv):
 			temp = argumenty[i].split("=")
 			try:
 				ip = temp[1]
+				print(ip)
 			except IndexError:
 				print("Niepoprawny argument: --address_ip (-ip)")
 				sys.exit()
@@ -55,13 +56,17 @@ def main(argv):
 		os.close(pipe_w) # Zamykamy deskryptor pliku
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 		while 1:
-			data = pipe_r.read(1024)
+		#print(pipe_r)
+			data = os.fdopen(pipe_r)
+			message = data.read(1316)
 			if data:
-				sock.sendto(data, (ip, port)) # Wysyłanie datagramu UDP
+				sock.sendto(message, (ip, port)) # Wysyłanie datagramu UDP
 	else:
 		# child()
-		os.close(pipe_r)
-		process = subprocess.Popen(["ffmpeg", "-re", "-video_size", "1920x1080", "-framerate", "30", "-f", "x11grab", "-i", ":0.0", "-c:v", "mpeg2video", "-crf", "0", "-preset", "ultrafast", "-maxrate", "20M", "-b:v", "10M", "-f", "mpegts", pipe_w])
+		#os.close(pipe_r)
+		#w = os.fdopen(pipe_w, "w")
+		dev_null = open(os.devnull, "w")
+		process = subprocess.call(["ffmpeg", "-re", "-video_size", "1920x1080", "-framerate", "30", "-f", "x11grab", "-i", ":0.0", "-c:v", "mpeg2video", "-crf", "0", "-preset", "ultrafast", "-maxrate", "20M", "-b:v", "10M", "-f", "mpegts", "-"], stdout=pipe_w, stderr=dev_null)
 
 
 if __name__ == "__main__":
